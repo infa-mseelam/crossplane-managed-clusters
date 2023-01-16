@@ -1,0 +1,61 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: ekscluster
+  labels:
+    provider: aws
+spec:
+  compositeTypeRef:
+    apiVersion: aws.informatica.com/v1alpha1
+    kind: XEKSCluster
+  resources:
+    - name: ekscluster
+      base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Cluster
+        spec:
+          forProvider:
+            enabledClusterLogTypes: ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+            kubernetesNetworkConfig:
+              - ipFamily: "ipv4"
+                serviceIpv4Cidr: "172.20.0.0/16"
+            vpcConfig:
+            - securityGroupIds: ["sg-078a1234d69cbe2cc"]
+              subnetIds: ["subnet-063014cf8e2608460", "subnet-0941fda3342bbdd88", "subnet-09a49e14e4eed6d6d"]
+      patches:
+        - fromFieldPath: "spec.region"
+          toFieldPath: "spec.forProvider.region"
+        - fromFieldPath: "spec.env"
+          toFieldPath: "spec.forProvider.roleArn"
+          transforms:
+            - type: map
+              map:
+                qa: "arn:aws:iam::530774763960:role/InfaEKSControlPlaneRole"
+                prod: "arn:aws:iam::530774763960:role/InfaEKSControlPlaneRolePROD"
+                dev: "arn:aws:iam::530774763960:role/InfaEKSControlPlaneRoleDEV"
+        - fromFieldPath: "spec.public"
+          toFieldPath: "spec.forProvider.vpcConfig[0].endpointPrivateAccess"
+          transforms:
+            - type: map
+              map:
+                "true": "false"
+                "false": "true"
+            - type: convert
+              convert:
+                toType: bool
+        - fromFieldPath: "spec.public"
+          toFieldPath: "spec.forProvider.vpcConfig[0].endpointPublicAccess"
+          transforms:
+            - type: convert
+              convert:
+                toType: bool
+        - fromFieldPath: "spec.tags.ownerEmail"
+          toFieldPath: "spec.forProvider.tags.OWNEREMAIL"
+        - fromFieldPath: "spec.env"
+          toFieldPath: "spec.forProvider.tags.APPLICATIONENV"
+        - fromFieldPath: "spec.be"
+          toFieldPath: "spec.forProvider.tags.BUSINESSENTITY"
+        - fromFieldPath: "spec.bu"
+          toFieldPath: "spec.forProvider.tags.BUSINESSUNIT"
+        - fromFieldPath: "spec.metadata.name"
+          toFieldPath: "spec.forProvider.tags.SERVICENAME"

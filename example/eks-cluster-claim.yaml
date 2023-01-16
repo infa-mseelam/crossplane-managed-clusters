@@ -1,0 +1,15 @@
+apiVersion: aws.informatica.com/v1alpha1
+kind: EKSCluster
+metadata:
+  namespace: crossplane-system
+  name: nang-cluster
+spec:
+  name: cloudtrust-nang-cluster
+  region: us-west-2
+  public: "false"
+  env: qa
+  org:
+    be: cloudtrust 
+    bu: infrastructure
+  tags:
+    ownerEmail: nang@informatica.com

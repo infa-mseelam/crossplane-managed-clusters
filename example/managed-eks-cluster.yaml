@@ -1,0 +1,25 @@
+apiVersion: eks.aws.upbound.io/v1beta1
+kind: Cluster
+metadata:
+  name: nang-crossplane-cluster
+spec:
+  forProvider:
+    enabledClusterLogTypes: ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+    region: us-west-2
+    kubernetesNetworkConfig:
+      - ipFamily: "ipv4"
+        serviceIpv4Cidr: "172.20.0.0/16"
+    roleArn: "arn:aws:iam::530774763960:role/InfaEKSControlPlaneRole"
+    tags:
+      ALERTGROUP: "ops_team"
+      APPLICATIONENV: "QA"
+      BUSINESSENTITY: "CLOUDTRUST"
+      BUSINESSUNIT: "INFRASTRUCTURE"
+      OWNEREMAIL: "nang@informatica.com"
+      POD:  "nang-crossplane-cluster"
+      SERVICENAME: "infrastructure"
+    vpcConfig:
+     - endpointPrivateAccess: true
+       endpointPublicAccess: false
+       securityGroupIds: ["sg-078a1234d69cbe2cc"]
+       subnetIds: ["subnet-063014cf8e2608460", "subnet-0941fda3342bbdd88", "subnet-09a49e14e4eed6d6d"]
